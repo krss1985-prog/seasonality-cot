@@ -3,6 +3,6 @@ services:
     name: seasonality-cot
     env: python
     plan: free
-    buildCommand: python3 -m pip install -r requirements.txt
-    startCommand: python3 -m streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
+    buildCommand: /opt/render/project/python/bin/pip install -r requirements.txt
+    startCommand: /opt/render/project/python/bin/python -m streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
     autoDeploy: true
