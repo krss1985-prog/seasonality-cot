@@ -1,0 +1,45 @@
+name: Update COT and Seasonality Data
+
+on:
+  schedule:
+    # Run every Tuesday at 10:00 UTC
+    # CFTC publishes Friday data; it is typically available on the CFTC site by Tuesday
+    - cron: "0 10 * * 2"
+  workflow_dispatch:  # allow manual trigger from GitHub Actions UI
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch latest COT and price data
+        run: python cot_and_price_fetch.py
+
+      - name: Fetch latest seasonality data
+        run: python yahoo_seasonality_pack.py
+
+      - name: Commit and push updated data files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cot_*.csv price_*.csv prices_daily_raw.csv seasonality_daily.csv seasonality_weekly.csv
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore: update COT, price and seasonality data [skip ci]"
+            git push
+          fi
